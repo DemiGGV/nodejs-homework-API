@@ -22,6 +22,10 @@ const contactDBSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     versionKey: false,
@@ -43,14 +47,19 @@ const contactSchema = Joi.object({
   }),
   phone: Joi.string().pattern(PHONEPATTERN).required().messages({
     "any.required": `missing fields`,
+    "string.pattern.base": `wrong phone`,
   }),
-  favorite: Joi.boolean(),
+  favorite: Joi.boolean().messages({
+    "any.required": `missing fields`,
+  }),
 });
+
 const updFavoriteSchema = Joi.object({
   favorite: Joi.boolean().required().messages({
     "any.required": `missing field favorite`,
   }),
 });
+
 const schemas = {
   contactSchema,
   updFavoriteSchema,
