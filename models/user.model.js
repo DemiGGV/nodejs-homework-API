@@ -44,7 +44,7 @@ const signupSchema = Joi.object({
     "any.required": `missing fields`,
     "string.pattern.base": `wrong email`,
   }),
-  password: Joi.string().min(6).required().messages({
+  password: Joi.string().required().messages({
     "any.required": `missing fields`,
   }),
 });
