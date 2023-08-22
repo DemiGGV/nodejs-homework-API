@@ -1,7 +1,7 @@
 const ctrlWrap = (ctrl) => {
-  const foo = async (req, resp, next) => {
+  const foo = async (req, res, next) => {
     try {
-      await ctrl(req, resp, next);
+      await ctrl(req, res, next);
     } catch (error) {
       next(error);
     }
