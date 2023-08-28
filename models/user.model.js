@@ -23,6 +23,10 @@ const userSchema = new Schema(
       enum: subScription,
       default: "starter",
     },
+    avatarURL: {
+      type: String,
+      default: null,
+    },
     token: {
       type: String,
       default: null,
