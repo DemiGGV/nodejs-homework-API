@@ -10,6 +10,7 @@ const { HttpError } = require("./helpers");
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(express.static("public"));
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 app.use(logger(formatsLogger));
