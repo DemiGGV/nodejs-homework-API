@@ -1,21 +1,21 @@
 const nodemailer = require("nodemailer");
 // const { HttpError } = require("../helpers");
-const { SERVER_URL, UN_PASS } = process.env;
+const { SERVER_URL, UN_PASS, UN_USER, UN_SERVER, UN_PORT } = process.env;
 
 const sendMail = async (email, verificationToken) => {
   const config = {
-    host: "smtp.ukr.net",
-    port: 465,
+    host: UN_SERVER,
+    port: UN_PORT,
     secure: true,
     auth: {
-      user: "goit_nodejs77@ukr.net",
+      user: UN_USER,
       pass: UN_PASS,
     },
   };
 
   const transporter = nodemailer.createTransport(config);
   const emailOptions = {
-    from: "goit_nodejs77@ukr.net",
+    from: UN_USER,
     to: email,
     subject: "Nodemailer test",
     html: `<a target="_blank" href="${SERVER_URL}/api/users/verify/${verificationToken}">Click here to verify your email GoIT George Goncharov</a>`,
