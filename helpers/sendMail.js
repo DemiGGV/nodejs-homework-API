@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-// const { HttpError } = require("../helpers");
+
 const { SERVER_URL, UN_PASS, UN_USER, UN_SERVER, UN_PORT } = process.env;
 
 const sendMail = async (email, verificationToken) => {
@@ -17,7 +17,7 @@ const sendMail = async (email, verificationToken) => {
   const emailOptions = {
     from: UN_USER,
     to: email,
-    subject: "Nodemailer test",
+    subject: "Email login confirmation",
     html: `<a target="_blank" href="${SERVER_URL}/api/users/verify/${verificationToken}">Click here to verify your email GoIT George Goncharov</a>`,
   };
   try {
