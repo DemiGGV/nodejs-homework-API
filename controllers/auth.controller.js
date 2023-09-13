@@ -1,9 +1,10 @@
 const fs = require("fs/promises");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const path = require("path");
 const gravatar = require("gravatar");
-const { HttpError, ctrlWrap, imageResize } = require("../helpers");
+const { HttpError, ctrlWrap, imageResize, sendMail } = require("../helpers");
 const { User } = require("../models/user.model");
 
 const { SECRET_KEY } = process.env;
@@ -15,6 +16,7 @@ const signup = async (req, res) => {
   if (user) throw HttpError(409, "Email in use");
 
   const hashPassword = await bcrypt.hash(password, 10);
+  const verificationToken = crypto.randomUUID();
   const avatarURL = gravatar.url(email, {
     protocol: "https",
     s: "250",
@@ -24,7 +26,11 @@ const signup = async (req, res) => {
     ...req.body,
     password: hashPassword,
     avatarURL,
+    verificationToken,
   });
+
+  await sendMail(email, verificationToken);
+
   res.status(201).json({
     user: {
       email: newUser.email,
@@ -34,11 +40,37 @@ const signup = async (req, res) => {
   });
 };
 
+const verifyAuth = async (req, res) => {
+  const { verificationToken } = req.params;
+  console.log(verificationToken);
+  const user = await User.findOne({ verificationToken });
+  if (!user) throw HttpError(401, "Email or password is wrong");
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: null,
+  });
+
+  res.json({ message: "Verification successful" });
+};
+
+const resendEmail = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) throw HttpError(404, "User not found");
+  if (user.verify) throw HttpError(400, "Verification has already been passed");
+
+  await sendMail(email, user.verificationToken);
+
+  res.json({ message: "Verification email sent" });
+};
+
 const signin = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
   if (!user) throw HttpError(401, "Email or password is wrong");
+  if (!user.verify) throw HttpError(404, "User not found");
   if (user.token) throw HttpError(422, "Already logined");
 
   const checkPassword = await bcrypt.compare(password, user.password);
@@ -95,4 +127,6 @@ module.exports = {
   getCurrent: ctrlWrap(getCurrent),
   updSubscription: ctrlWrap(updSubscription),
   updAvatar: ctrlWrap(updAvatar),
+  verifyAuth: ctrlWrap(verifyAuth),
+  resendEmail: ctrlWrap(resendEmail),
 };
